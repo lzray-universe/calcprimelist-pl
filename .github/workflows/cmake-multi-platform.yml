@@ -1,0 +1,87 @@
+name: Build & Release (Win MSVC+AVX2 / Linux)
+
+on:
+  push:
+    tags: ['v*']   
+  workflow_dispatch:
+
+permissions:
+  contents: write  
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: calcprimelist ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    needs: create_release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+
+      - name: Configure (Windows, MSVC + AVX2)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: >
+          cmake -S . -B build -A x64
+          -DCMAKE_CXX_FLAGS="/arch:AVX2"
+          -DCMAKE_C_FLAGS="/arch:AVX2"
+
+      - name: Configure (Linux, Release)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build (Release)
+        run: cmake --build build --config Release --parallel
+
+      - name: Run tests
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Package (Windows zip)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          $zip = "dist/calcprimelist-${{ github.ref_name }}-windows-x64.zip"
+          $paths = @("build/Release/*.exe","build/Release/*.dll","build/Release/*.pdb")
+          $files = Get-ChildItem -Path $paths -ErrorAction SilentlyContinue
+          if ($files.Count -eq 0) { throw "No build outputs found to package." }
+          Compress-Archive -Path $files.FullName -DestinationPath $zip -Force
+
+      - name: Package (Linux tar.gz)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          mkdir -p dist pkg
+          cp -f build/prime-sieve pkg/ 2>/dev/null || true
+          cp -f build/*.so pkg/ 2>/dev/null || true
+          [ "$(ls -A pkg)" ] || { echo "No build outputs found to package." >&2; exit 1; }
+          tar -czf "dist/calcprimelist-${{ github.ref_name }}-linux-x64.tar.gz" -C pkg .
+
+    
+      - name: Upload assets to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: |
+            dist/*.zip
+            dist/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
