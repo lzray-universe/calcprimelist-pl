@@ -1,6 +1,6 @@
 
 # calcprimelist
-[![License: MIT](https://img.shields.io/badge/License-MIT-2ea44f?style=for-the-badge)](./LICENSE)© 2025 lzray
+[![License: MIT](https://img.shields.io/badge/License-MIT-2ea44f)](./LICENSE)© 2025 lzray
 
 
 [![English](https://img.shields.io/badge/lang-English-informational)](README_ENG.md)
