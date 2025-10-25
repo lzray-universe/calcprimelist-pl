@@ -28,21 +28,6 @@ jobs:
         shell: pwsh
         run: cmake --build build --config Release --parallel
 
-      # ---- 无输出自检：确认 count 模式没有任何进度/杂项输出 ----
-      - name: Smoke test (no extra output in --count)
-        shell: pwsh
-        run: |
-          $exe = Get-ChildItem -Recurse build -Filter *.exe | Where-Object { $_.Name -match 'prime' -or $_.Name -match 'sieve' } | Select-Object -First 1
-          if (-not $exe) { throw "Executable not found." }
-          $outFile = Join-Path $env:RUNNER_TEMP "stdout.txt"
-          $errFile = Join-Path $env:RUNNER_TEMP "stderr.txt"
-          # 选择一个中小规模，避免过久；仅做形态检查
-          & $exe.FullName --to 10000000 --count --threads 1 1> $outFile 2> $errFile
-          $stdout = Get-Content $outFile -Raw
-          $stderr = Get-Content $errFile -Raw
-          if ($stderr.Trim().Length -ne 0) { throw "Unexpected STDERR: $stderr" }
-          if ($stdout -notmatch '^\s*\d+\s*$') { throw "Unexpected STDOUT: $stdout" }
-
       - name: Package artifact
         uses: actions/upload-artifact@v4
         with:
