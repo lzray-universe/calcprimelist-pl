@@ -1,11 +1,7 @@
 
 # calcprimelist
-<p align="left">
-  <a href="./LICENSE">
-    <img src="https://img.shields.io/badge/License-MIT-2ea44f?style=for-the-badge" alt="License: MIT" />
-  </a><br/>
-  <sub>© 2025 lzray</sub>
-</p>
+[![License: MIT](https://img.shields.io/badge/License-MIT-2ea44f?style=for-the-badge)](./LICENSE)© 2025 lzray
+
 
 
 
