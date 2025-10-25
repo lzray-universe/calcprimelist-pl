@@ -1,5 +1,14 @@
 
 # calcprimelist
+<p align="left">
+  <a href="./LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-2ea44f?style=for-the-badge" alt="License: MIT" />
+  </a><br/>
+  <sub>© 2025 lzray</sub>
+</p>
+
+
+
 
 一个可并行的**分段筛素数**工具与库（C++20）。支持：
 
@@ -11,7 +20,7 @@
 * Miller–Rabin 素性测试
 * C++ 静态库、跨语言 C ABI（DLL/.so）调用
 
-License：MIT（© 2025 lzray）
+
 
 ---
 
