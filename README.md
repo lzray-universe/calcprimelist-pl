@@ -501,7 +501,7 @@ int main() {
 > 对每个区间上界 `--to ∈ {1e6, 1e7, 1e8, 1e9, 1e10}`，运行
 > `prime-sieve --to {N} --count --time` 重复 10 次，统计 **best / median / mean**。
 > Windows 等价命令：`.\prime-sieve.exe --to {N} --count --time`。
-> 注：`--time` 为工具内计时（秒），若不可用则以外部 wall-clock 计时。具体环境（CPU/内存/OS/编译器）会影响绝对值。
+> 注：`--time` 为工具内计时（微秒），若不可用则以外部 wall-clock 计时。具体环境（CPU/内存/OS/编译器）会影响绝对值。
 
 **测试数据（10 次/每点）：**（本表来自 `Intel® Core™ Ultra 7 265K`）
 
