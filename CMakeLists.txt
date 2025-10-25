@@ -1,6 +1,50 @@
 cmake_minimum_required(VERSION 3.16)
 project(calcprimelist LANGUAGES CXX)
+# ===== Aggressive perf flags (Release only) =====
+# Turn on IPO/LTO globally for Release
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 
+# Silence non-essential logs in Release if你的代码支持该宏（可选）
+# add_compile_definitions($<$<CONFIG:Release>:CALCPRIME_SILENT=1>)
+
+# Global compile/link options for Release
+if (MSVC)
+  # Compile-time opts
+  add_compile_options(
+    $<$<CONFIG:Release>:/O2>
+    $<$<CONFIG:Release>:/GL>           # IPO/LTO
+    $<$<CONFIG:Release>:/Gw>           # Whole program ICF
+    $<$<CONFIG:Release>:/Gy>           # Function-level linking
+    $<$<CONFIG:Release>:/Ob3>          # Inline aggressively
+    $<$<CONFIG:Release>:/Oi>           # Intrinsics
+    $<$<CONFIG:Release>:/Ot>           # Favor speed
+    $<$<CONFIG:Release>:/arch:AVX2>    # Vector ISA
+    $<$<CONFIG:Release>:/favor:INTEL64>
+    $<$<CONFIG:Release>:/fp:fast>
+    $<$<CONFIG:Release>:/GS->          # disable buffer checks
+    $<$<CONFIG:Release>:/DNDEBUG>
+    $<$<CONFIG:Release>:/D_HAS_ITERATOR_DEBUGGING=0>
+    $<$<CONFIG:Release>:/D_ITERATOR_DEBUG_LEVEL=0>
+    $<$<CONFIG:Release>:/D_SECURE_SCL=0>
+  )
+  # Link-time opts
+  add_link_options(
+    $<$<CONFIG:Release>:/LTCG>         # IPO/LTO at link
+    $<$<CONFIG:Release>:/OPT:ICF>
+    $<$<CONFIG:Release>:/OPT:REF>
+  )
+else()
+  # GCC/Clang
+  add_compile_options(
+    $<$<CONFIG:Release>:-O3>
+    $<$<CONFIG:Release>:-ffp-contract=fast>
+    $<$<CONFIG:Release>:-DNDEBUG>
+    # x86: make sure we actually get POPCNT/BMI2 in addition to AVX2
+    $<$<AND:$<CONFIG:Release>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},x86_64>>:-mavx2 -mpopcnt -mbmi2 -mfma>
+  )
+  add_link_options($<$<CONFIG:Release>:-flto>)
+endif()
+# ===== end aggressive flags =====
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
